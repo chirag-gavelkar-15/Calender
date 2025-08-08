@@ -1,17 +1,21 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import Modal from 'react-modal';
 import BarChartData from './BarChartData';
 import DummyData from './DummyData';
+import { useSelector, useDispatch } from 'react-redux';
+import { setSelectedDate, openModal, closeModal } from './store/CalenderSlice';
 
 const localizer = momentLocalizer(moment);
 
 const App = () => {
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const dispatch = useDispatch();
+  const selectedDate = useSelector(state => state.calendar.selectedDate);
+  const isModalOpen = useSelector(state => state.calendar.modalOpen);
 
   const events = Object.keys(DummyData).map(date => ({
     title: `Data available`,
@@ -22,8 +26,8 @@ const App = () => {
 
   const handleSelectSlot = ({ start }) => {
     const dateStr = moment(start).format('DD-MM-YYYY');
-    setSelectedDate(dateStr);
-    setIsModalOpen(true);
+    dispatch(setSelectedDate(dateStr));
+    dispatch(openModal());
   };
 
   return (
@@ -39,11 +43,11 @@ const App = () => {
         style={{ height: 500 }}
       />
 
-      <Modal isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} ariaHideApp={false}>
+      <Modal isOpen={isModalOpen} onRequestClose={() =>  dispatch(closeModal())} ariaHideApp={false}>
         <BarChartData
           date={selectedDate}
           data={DummyData[selectedDate] || []}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => dispatch(closeModal())}
         />
       </Modal>
     </div>
@@ -51,6 +55,7 @@ const App = () => {
 };
 
 export default App;
+
 
 
 
